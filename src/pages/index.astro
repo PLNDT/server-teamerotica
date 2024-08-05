@@ -1,16 +1,103 @@
 ---
+import { stl } from "helpers/common";
+import Main from "layouts/main.astro";
+import D from "data/d";
 
+const { pathname } = Astro.url;
+
+const meta = {
+  url: `https://teamerotica.com`,
+  title: `Welcome to Team Erotica - Home of Sex Stories | Erotic Stories`,
+  description: `Immerse with our collection of the sexiest sex stories. Browse diverse genres, share your own, connect and build your own library now!`,
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  url: meta.url,
+  name: meta.title,
+  description: meta.description,
+  publisher: {
+    "@type": "Organization",
+    name: "Team Erotica",
+    logo: {
+      "@type": "ImageObject",
+      url: `https://teamerotica.com/android-chrome-192x192.png`,
+    },
+  },
+};
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Main
+  $document={{
+    title: meta.title,
+    og: {
+      url: meta.url,
+      type: "website",
+      title: meta.title,
+      description: meta.description,
+    },
+    meta: {
+      description: meta.description,
+      "twitter:card": "summary",
+      "twitter:title": meta.title,
+      "twitter:description": meta.description,
+    },
+    jsonLd,
+  }}
+  pathname={pathname}
+>
+  <div class="tx-home">
+    <h1 class="uk-h1">
+      Free
+      <span class="color" style={stl({ "--color": "var(--uk-danger)" })}>
+        sex
+      </span>
+      stories.
+    </h1>
+    <p
+      class="color mt"
+      style={stl({
+        "--color": "var(--uk-muted-f)",
+        "--mt": "2",
+      })}
+    >
+      {meta.description}
+    </p>
+
+    <div class="pt" style={stl({ "--pt": "6" })}>
+      <h2 class="uk-h2">Genres</h2>
+      <ul
+        class="uk-list uk-list-hyphen mt columns"
+        style={stl({ "--mt": "5", "--columns": "2" })}
+      >
+        {
+          // 1. Wrap D.genres in Object.values()
+          Object.values(D.genres).map((a) => (
+            <li>
+              <a class="uk-focus-visible" href={`/genres/${a.slug}`}>
+                {a.text}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h2 class="uk-h2 mt" style={stl({ "--mt": "10" })}>Themes</h2>
+      <ul
+        class="uk-list uk-list-hyphen mt columns"
+        style={stl({ "--mt": "5", "--columns": "2" })}
+      >
+        {
+          Object.values(D.themes).map((a) => (
+            <li>
+              <a class="uk-focus-visible" href={`/themes/${a.slug}`}>
+                {a.text}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</Main>

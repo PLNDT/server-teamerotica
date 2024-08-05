@@ -1,0 +1,390 @@
+---
+import D from "data/d";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { marked } from "marked";
+import type { GetStaticPaths } from "astro";
+import Main from "layouts/main.astro";
+import { stl } from "helpers/common";
+import Sharer from "components/sharer.astro";
+
+// 1. Define the shape of your complete story data
+export interface Story {
+  id: string;
+  title: string;
+  link: string;
+  author: string;
+  authorLink: string;
+  description: string;
+  rating: string;
+  reads: number;
+  posted: string;
+  posted_iso: string | null;
+  tags: string[];
+  authorInfos?: string;
+  introduction?: string;
+  content: string;
+}
+
+// 2. Define the props this component expects
+export interface Props {
+  story: Story;
+}
+
+// 3. Strongly type the getStaticPaths function
+export const getStaticPaths = (async () => {
+  const storiesDir = path.resolve(process.cwd(), "out", "stories");
+
+  let files: string[] = [];
+  try {
+    files = await fs.readdir(storiesDir);
+  } catch (e) {
+    console.error("⚠ Stories directory not found. Did you run the scraper?");
+    return [];
+  }
+
+  const jsonFiles = files.filter((f) => f.endsWith(".json"));
+  const paths: any[] = [];
+
+  for (const file of jsonFiles) {
+    const rawData = await fs.readFile(path.join(storiesDir, file), "utf-8");
+
+    // Cast the parsed JSON to our TypeScript interface
+    const story: Story = JSON.parse(rawData);
+
+    paths.push({
+      params: { id: story.id },
+      props: { story },
+    });
+  }
+
+  return paths;
+}) satisfies GetStaticPaths;
+
+// Extract the typed story data
+const { story } = Astro.props;
+
+// Parse the Markdown content into HTML safely
+const parsedContentHtml = marked.parse(
+  story.content.trim().replace(/\* \* \*$/, "") || "",
+);
+
+const wordCount = story.content.trim().split(/\s+/).filter(Boolean).length;
+const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
+const meta = {
+  url: `https://teamerotica.com/stories/${story.id}`,
+  title: `${story.title} by ${story.author} | Sex Story`,
+  description: `Read ${story.title} on Team Erotica. Discover more sex stories like this when you join us now!`,
+};
+
+const cat = D["genres"]
+  ? Object.values(D["genres"]).find((item) => item.text === story.tags[0])
+  : undefined;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: story.title,
+  description: meta.description,
+  author: {
+    "@type": "Person",
+    name: story.author,
+    // url: `https://teamerotica.com/authors/${entry?.data.author}`,
+  },
+  datePublished: story.posted_iso,
+  wordCount: wordCount,
+  timeRequired: readingTime,
+  genre: cat && {
+    "@type": "Genre",
+    name: cat.text,
+    url: `https://teamerotica.com/genres/${cat.slug}`,
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "Team Erotica",
+    logo: {
+      "@type": "ImageObject",
+      url: `https://teamerotica.com/android-chrome-192x192.png`,
+    },
+  },
+  mainEntityOfPage: {
+    "@type": "WebPage",
+    "@id": meta.url,
+  },
+};
+---
+
+<Main
+  $document={{
+    title: meta.title,
+    og: {
+      url: meta.url,
+      type: "website",
+      title: meta.title,
+      description: meta.description,
+    },
+    meta: {
+      description: meta.description,
+      "twitter:card": "summary",
+      "twitter:title": meta.title,
+      "twitter:description": meta.description,
+    },
+    jsonLd,
+  }}
+  $d={`/genres/${cat?.slug}`}
+>
+  <div class="tx-posts">
+    <div class="mx-auto max-w-3xl">
+      <div
+        class="display-flex pb pt sm:pb sm:pt justify-center"
+        style={stl({
+          "--pb": "4",
+          "--pt": "12",
+          "--sm-pb": "8",
+          "--sm-pt": "16",
+        })}
+      >
+        <div
+          class="display-flex gap-x items-center"
+          style={stl({
+            "--gap-x": "1",
+          })}
+        >
+          <a
+            class="display-inline-flex color items-center"
+            style={stl({
+              "--color": "var(--uk-muted-f)",
+            })}
+            href="javascript:history.back()"
+          >
+            <uk-icon
+              class="size"
+              style={stl({
+                "--size": "4",
+              })}
+              icon="arrow-left"
+            >
+            </uk-icon>
+            <span
+              class="ml"
+              style={stl({
+                "--ml": "2",
+              })}
+            >
+              Back
+            </span>
+          </a>
+          <span
+            class="color"
+            style={stl({
+              "--color": "var(--uk-muted-f)",
+            })}
+          >
+            /
+          </span>
+          <a class="font-medium">{cat?.text}</a>
+        </div>
+      </div>
+
+      <h1
+        class="uk-h1 px pb sm:px sm:pb text-center"
+        style={stl({
+          "--px": "6",
+          "--pb": "4",
+          "--sm-px": "20",
+          "--sm-pb": "8",
+        })}
+      >
+        {story.title}
+      </h1>
+
+      <div
+        class="display-flex gap-x items-center justify-center"
+        style={stl({
+          "--gap-x": "2",
+        })}
+      >
+        <div class="uk-avatar uk-avatar-rounded uk-avatar-bordered flex-none">
+          <img
+            src={`https://api.dicebear.com/9.x/lorelei/svg?seed=${story.author}`}
+            alt=""
+          />
+        </div>
+        <div
+          class="color truncate"
+          style={stl({
+            "--color": "var(--uk-muted-f)",
+          })}
+        >
+          <span
+            class="color font-medium"
+            style={stl({
+              "--color": "var(--uk-bg-f)",
+            })}
+          >
+            {story.author}
+          </span>
+        </div>
+      </div>
+
+      <div
+        class="share-bar mb mt"
+        style={stl({
+          "--mb": "6",
+          "--mt": "20",
+        })}
+        data-uk-sticky="cls-active: uk-active"
+      >
+        <div class="share-bar-meta">
+          <div class="line-clamp-1 font-bold">{story.title}</div>
+          <div
+            class="color"
+            style={stl({
+              "--color": "var(--uk-muted-f)",
+            })}
+          >
+            {story.author}
+          </div>
+        </div>
+
+        <div
+          class="display-flex gap-x ml-auto items-center"
+          style={stl({
+            "--gap-x": "2",
+          })}
+        >
+          <button
+            class="uk-button uk-button-primary uk-button-small rounded-full"
+            data-uk-toggle="#share"
+          >
+            <uk-icon
+              class="size"
+              style={stl({
+                "--size": "4",
+              })}
+              icon="share-2"
+            >
+            </uk-icon>
+            <span
+              class="ml"
+              style={stl({
+                "--ml": "2",
+              })}
+            >
+              Share
+            </span>
+          </button>
+
+          <button
+            class="uk-button uk-button-default uk-button-icon uk-button-small rounded-full"
+            title="Go to top"
+            x-data
+            x-on:click="window.scrollTo({ top: 0, behavior: 'smooth' })"
+          >
+            <uk-icon
+              class="size"
+              style={stl({
+                "--size": "4",
+              })}
+              icon="arrow-up"
+            >
+            </uk-icon>
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="color mb display-flex sm:px lg:px justify-between"
+        style={stl({
+          "--color": "var(--uk-muted-f)",
+          "--mb": "6",
+          "--sm-px": "4",
+          "--lg-px": "0",
+        })}
+      >
+        <div
+          class="display-flex gap-x items-center"
+          style={stl({ "--gap-x": "2" })}
+        >
+          <uk-icon
+            class="size"
+            style={stl({
+              "--size": "4",
+            })}
+            icon="clock-fading"
+          >
+          </uk-icon>
+
+          <span>
+            {readingTime}
+            {readingTime === 1 ? "minute" : "minutes"}
+          </span>
+        </div>
+
+        <time datetime={story.posted_iso}>
+          {new Date(story.posted_iso as string).toLocaleDateString()}
+        </time>
+      </div>
+
+      <div
+        class="tx-typography sm:pb md:pb"
+        style={stl({
+          "--sm-pb": "12",
+          "--md-pb": "16",
+        })}
+      >
+        {
+          story.introduction && (
+            <Fragment>
+              <blockquote class="uk-blockquote">
+                {story.introduction}
+              </blockquote>
+              <hr class="uk-hr my" style={stl({ "--my": "16" })} />
+            </Fragment>
+          )
+        }
+        <Fragment set:html={parsedContentHtml} />
+
+        <div
+          class="mt display-flex gap flex-wrap"
+          style={stl({ "--mt": "16", "--gap": "2" })}
+        >
+          {
+            story.tags.map((tagText, index) => {
+              // 1. If it's the first item (index 0), look in genres. Otherwise, themes.
+              const catType = index === 0 ? "genres" : "themes";
+
+              // 2. Search that specific category for the matching text (handling slashes inline)
+              const match = Object.values(D[catType]).find(
+                (item) =>
+                  item.text.replace(/\s*\/\s*/g, " / ") ===
+                  tagText.replace(/\s*\/\s*/g, " / "),
+              );
+
+              // 3. If no match is found in the dictionary, skip rendering this tag
+              if (!match) {
+                return null;
+              }
+
+              // 4. Render the link (removed the optional chaining `?.` since we know match exists now)
+              return (
+                <a
+                  class="uk-tag uk-tag-secondary uk-focus-visible"
+                  href={`/${catType}/${match.slug}`}
+                >
+                  {match.text}
+                </a>
+              );
+            })
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</Main>
+
+<Sharer
+  title={meta.title}
+  url={`https://teamerotica.com/stories/${story.id}`}
+/>

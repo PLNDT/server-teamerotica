@@ -1,0 +1,280 @@
+---
+import fs from "node:fs/promises";
+import path from "node:path";
+import type { GetStaticPaths } from "astro";
+import Main from "layouts/main.astro";
+import { stl } from "helpers/common";
+import D from "data/d";
+
+// 1. Define the shape of your scraped story index data
+export interface Story {
+  id: string;
+  title: string;
+  link: string;
+  author: string;
+  authorLink: string;
+  description: string;
+  rating: string;
+  reads: number;
+  posted: string;
+  posted_iso: string | null;
+  tags: string[];
+}
+
+// 2. Define the exact props this component will receive
+export interface Props {
+  stories: Story[];
+  currentPage: number;
+  totalPages: number;
+}
+
+// 3. Strongly type the return of getStaticPaths
+export const getStaticPaths = (async () => {
+  const outDir = path.resolve(process.cwd(), "out");
+  const paths: any[] = [];
+
+  try {
+    const categories = await fs.readdir(outDir);
+
+    for (const d of categories) {
+      if (d === "stories") continue;
+
+      const categoryPath = path.join(outDir, d);
+      const statD = await fs.stat(categoryPath);
+      if (!statD.isDirectory()) continue;
+
+      const slugs = await fs.readdir(categoryPath);
+
+      for (const slug of slugs) {
+        const pagesPath = path.join(categoryPath, slug, "pages");
+
+        let pageFiles: string[] = [];
+        try {
+          pageFiles = await fs.readdir(pagesPath);
+        } catch (e) {
+          continue; // Skip if no pages folder exists
+        }
+
+        const jsonFiles = pageFiles.filter((f) => f.endsWith(".json"));
+        const totalPages = jsonFiles.length;
+
+        for (const file of jsonFiles) {
+          const pageNum = file.replace(".json", "");
+          const rawData = await fs.readFile(
+            path.join(pagesPath, file),
+            "utf-8",
+          );
+
+          // Cast the parsed JSON to our TypeScript array
+          const stories: Story[] = JSON.parse(rawData);
+
+          paths.push({
+            params: {
+              d,
+              slug,
+              page: pageNum === "1" ? undefined : `page/${pageNum}`,
+            },
+            props: {
+              stories,
+              currentPage: parseInt(pageNum, 10),
+              totalPages,
+            },
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.warn(
+      "⚠️ Warning: 'out' directory not found. Did you run the scraper?",
+    );
+  }
+
+  return paths;
+}) satisfies GetStaticPaths;
+
+// Astro automatically picks up the `Props` interface we exported above
+const { d, slug } = Astro.params;
+const { stories, currentPage, totalPages } = Astro.props;
+const cat = D[d]
+  ? Object.values(D[d]).find((item) => item.slug === slug)
+  : undefined;
+
+const meta = {
+  url: `https://teamerotica.com/${d}/${slug}`,
+  title: `${cat?.text} (Page 1) | Sex Stories`,
+  description: `Let the Team Erotica community drive you wild with our collection of scintillating ${cat?.text} stories.`,
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  url: meta.url,
+  name: meta.title,
+  description: meta.description,
+  hasPart: stories.map((story) => ({
+    "@type": "Article",
+    headline: story.title,
+    author: {
+      "@type": "Person",
+      name: story.author,
+    },
+    description: story.description,
+    // wordCount: story.data.word_count,
+    datePublished: story.posted_iso,
+    url: `${meta.url}/stories/${story.id}`,
+    genre: cat?.text,
+    // timeRequired: story.data.reading_time,
+    publisher: {
+      "@type": "Organization",
+      name: "Team Erotica",
+      logo: {
+        "@type": "ImageObject",
+        url: `https://teamerotica.com/android-chrome-192x192.png`,
+      },
+    },
+  })),
+  publisher: {
+    "@type": "Organization",
+    name: "Team Erotica",
+    logo: {
+      "@type": "ImageObject",
+      url: `https://teamerotica.com/android-chrome-192x192.png`,
+    },
+  },
+};
+---
+
+<Main
+  $document={{
+    title: meta.title,
+    og: {
+      url: meta.url,
+      type: "website",
+      title: meta.title,
+      description: meta.description,
+    },
+    meta: {
+      description: meta.description,
+      "twitter:card": "summary",
+      "twitter:title": meta.title,
+      "twitter:description": meta.description,
+    },
+    jsonLd,
+  }}
+  $d={`/${d}/${slug}`}
+>
+  <div class="tx-posts">
+    <div
+      class="sm:px sm:pt pb"
+      style={stl({
+        "--pb": "6",
+        "--sm-px": "10",
+        "--sm-pt": "20",
+      })}
+    >
+      <h1 class="uk-h1">
+        {cat?.text}
+        {
+          cat?.text.endsWith("sex") || cat?.text.endsWith("Sex") ? (
+            ""
+          ) : (
+            <span class="color" style={stl({ "--color": "var(--uk-danger)" })}>
+              sex
+            </span>
+          )
+        }
+
+        stories.
+      </h1>
+
+      <p
+        class="color mt"
+        style={stl({
+          "--color": "var(--uk-muted-f)",
+          "--mt": "2",
+        })}
+      >
+        {meta.description}
+      </p>
+    </div>
+    <div class="tx-posts-grid">
+      {
+        stories.map((story) => (
+          <article class="tx-posts-grid-item group">
+            <h2
+              class="uk-h3 color"
+              style={stl({ "--color": "var(--uk-bg-f)" })}
+            >
+              <a class="uk-focus-visible" href={`/stories/${story.id}`}>
+                {story.title}
+                <span class="inset absolute" style={stl({ "--inset": "0" })} />
+              </a>
+            </h2>
+            <p
+              class="color:group-hover transition-colors:group-hover line-clamp-3"
+              style={stl({ "--color-group-hover": "var(--uk-bg-f)" })}
+            >
+              {story.description}
+            </p>
+            <div
+              class="display-flex gap-x items-center"
+              style={stl({ "--gap-x": "2" })}
+            >
+              <div class="uk-avatar uk-avatar-rounded uk-avatar-bordered">
+                <img
+                  src={`https://api.dicebear.com/9.x/lorelei/svg?seed=${story.author}`}
+                  alt=""
+                />
+              </div>
+              <span
+                class="color:group-hover transition-colors:group-hover"
+                style={stl({ "--color-group-hover": "var(--uk-bg-f)" })}
+                data-fs
+              >
+                {story.author}
+              </span>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+
+    {
+      totalPages > 1 && (
+        <div class="tx-posts-grid-pgn">
+          {currentPage > 1 && (
+            <a
+              class="uk-button uk-button-default rounded-full"
+              href={`/${d}/${slug}${currentPage === 2 ? "" : `/page/${currentPage - 1}`}`}
+            >
+              <uk-icon
+                class="size"
+                style={stl({ "--size": "4" })}
+                icon="arrow-left"
+              />
+              <span class="ml" style={stl({ "--ml": "2" })}>
+                Previous
+              </span>
+            </a>
+          )}
+
+          {currentPage < totalPages && (
+            <a
+              class="uk-button uk-button-default ml-auto rounded-full"
+              href={`/${d}/${slug}/page/${currentPage + 1}`}
+            >
+              <span class="mr" style={stl({ "--mr": "2" })}>
+                Next
+              </span>
+              <uk-icon
+                class="size"
+                style={stl({ "--size": "4" })}
+                icon="arrow-right"
+              />
+            </a>
+          )}
+        </div>
+      )
+    }
+  </div>
+</Main>

@@ -1,0 +1,289 @@
+---
+import { stl } from "helpers/common";
+import Master from "layouts/master.astro";
+import D from "data/d";
+
+const { $document, $d } = Astro.props;
+---
+
+<Master $document={$document}>
+  <div class="tx-topbar isolate">
+    <div class="uk-container uk-container-large">
+      <div
+        class="display-flex h relative items-center"
+        style={stl({ "--h": "16" })}
+      >
+        <div class="z relative flex-none" style={stl({ "--z": "1" })}>
+          <button
+            class="uk-button uk-button-secondary uk-button-small"
+            data-uk-toggle="#menu"
+          >
+            <uk-icon class="size-4" icon="menu"></uk-icon>
+            <span class="ml-2">Menu</span>
+          </button>
+        </div>
+
+        <div
+          class="display-flex inset absolute h-full flex-1 items-center justify-center"
+          style={stl({ "--inset": "0", "--z": "0" })}
+        >
+          <a href="/">
+            <svg
+              class="fill h"
+              style={stl({ "--fill": "var(--uk-primary)", "--h": "6" })}
+              viewBox="0 0 661 222"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.400001 111C0.400001 44.2 45.2 0.199978 113.2 0.199978C176 0.199978 222.4 44.6 220.8 118.6L220.4 128.6H72.4C73.6 155.8 88.8 173 113.2 173C128.8 173 143.2 163.8 149.2 149.8L218 154.6C204.8 195.8 164 221.8 113.2 221.8C45.2 221.8 0.400001 177.8 0.400001 111ZM72.4 89.8H151.6C149.2 61.8 133.2 49 113.2 49C90 49 74.8 64.6 72.4 89.8ZM215.322 4.99999H281.722L282.922 49C291.322 20.2 307.722 4.99999 334.122 4.99999H352.922V54.6H333.722C298.122 54.6 284.122 70.2 284.122 102.2V217H215.322V4.99999ZM439.45 221.8C371.45 221.8 326.65 177.8 326.65 111C326.65 44.2 371.45 0.199978 439.45 0.199978C507.45 0.199978 552.25 44.2 552.25 111C552.25 177.8 507.45 221.8 439.45 221.8ZM397.45 111C397.45 149.4 412.25 171 439.45 171C466.25 171 481.45 149.4 481.45 111C481.45 72.6 466.25 51 439.45 51C412.25 51 397.45 72.6 397.45 111ZM589.228 152.6H660.428V217H589.228V152.6Z"
+              ></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="uk-container mt" style={stl({ "--mt": "6" })}>
+    <div class="display-flex pb items-center" style={stl({ "--pb": "8" })}>
+      <div class="display-flex gap-x ml-auto" style={stl({ "--gap-x": "3" })}>
+        <div
+          class="display-hidden w sm:display-inline"
+          style={stl({ "--w": "56" })}
+        >
+          <a
+            class="uk-input-fake uk-form-small color rounded-full"
+            style={stl({ "--color": "var(--uk-muted-f)" })}
+            href="/search"
+          >
+            <uk-icon class="size" style={stl({ "--size": "4" })} icon="search"
+            ></uk-icon>
+            <span class="ml" style={stl({ "--ml": "2" })}>Search</span>
+          </a>
+        </div>
+
+        <a
+          class="uk-button uk-button-default uk-button-icon uk-button-small sm:display-hidden rounded-full"
+          href="/search"
+        >
+          <uk-icon class="size" style={stl({ "--size": "4" })} icon="search"
+          ></uk-icon>
+        </a>
+
+        <uk-lsh
+          class="size"
+          style="--size: 8"
+          toggle
+          group="mode"
+          cls="uk-button uk-button-default uk-button-icon uk-button-small rounded-full relative"
+        >
+          <template data-fn="template">
+            <uk-icon
+              class="dark-slide-icon dark-slide-moon dark:dark-slide-moon"
+              icon="moon"
+            >
+            </uk-icon>
+            <uk-icon
+              class="dark-slide-icon dark-slide-sun dark:dark-slide-sun"
+              icon="sun"
+            >
+            </uk-icon>
+          </template>
+        </uk-lsh>
+
+        <div class="uk-inline">
+          <button
+            class="uk-button uk-button-default uk-button-icon uk-button-small rounded-full"
+            type="button"
+          >
+            <uk-icon
+              class="size"
+              style={stl({
+                "--size": "4",
+              })}
+              icon="settings"
+            >
+            </uk-icon>
+          </button>
+          <div
+            class="uk-drop min-w p bg border-w border/o"
+            style={stl({
+              "--min-w": "80",
+              "--p": "4",
+              "--bg": "var(--uk-drop)",
+              "--border-w": "1px",
+              "--border": "var(--uk-border)",
+              "--border-o": "var(--uk-border-o)",
+            })}
+            data-uk-drop="mode: click; pos: bottom-right; offset: 16px"
+          >
+            <div
+              class="space-y"
+              style={stl({
+                "--space-y": "6",
+              })}
+            >
+              {
+                [
+                  {
+                    label: "Choose a layout",
+                    group: "layout",
+                    options: [
+                      { value: "uk-layout-small", text: "Sm" },
+                      { value: "uk-layout-default", text: "Base" },
+                      { value: "uk-layout-medium", text: "Md" },
+                    ],
+                  },
+                  {
+                    label: "Font family",
+                    group: "ff",
+                    options: [
+                      {
+                        value: "uk-ff-a",
+                        text: "Option A",
+                      },
+                      {
+                        value: "uk-ff-b",
+                        text: "Option B",
+                      },
+                    ],
+                  },
+                ].map((a) => (
+                  <div>
+                    <div class="uk-form-label">{a.label}</div>
+                    <div
+                      class="display-flex gap-x mt"
+                      style={stl({
+                        "--gap-x": "2",
+                        "--mt": "2",
+                      })}
+                    >
+                      {a.options.map((b) => (
+                        <uk-lsh
+                          group={a.group}
+                          value={b.value}
+                          cls="ts uk-button uk-button-default uk-button-xsmall"
+                        >
+                          <template data-fn="template">
+                            <uk-icon
+                              class="ts-icon color"
+                              style={stl({
+                                "--color": "var(--color-blue-500)",
+                              })}
+                              icon="check"
+                            />
+                            {b.text}
+                          </template>
+                        </uk-lsh>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <slot />
+  </main>
+
+  <footer class="mt pb" style={stl({ "--mt": "20", "--pb": "6" })}>
+    <div class="uk-container">
+      <p>
+        This website is not a producer of any content displayed. All content is
+        provided by third parties in compliance with 18 U.S.C. §2257. All models
+        are 18+ at the time of production. For inquiries, email <a
+          class="uk-link"
+          href="mailto:info@teamerotica.com">info@teamerotica.com</a
+        >.
+      </p>
+      <p
+        class="color mt"
+        style={stl({ "--color": "var(--uk-muted-f)", "--mt": "4" })}
+      >
+        © 2026 Team Erotica — Home of Sex Stories
+      </p>
+    </div>
+  </footer>
+
+  <div class="uk-offcanvas" id="menu" data-uk-offcanvas="overlay: true">
+    <div class="uk-offcanvas-bar p" style={stl({ "--p": "4" })}>
+      <div class="mb display-flex justify-center" style={stl({ "--mb": "4" })}>
+        <button
+          class="uk-button uk-button-secondary uk-button-xsmall uk-offcanvas-close"
+        >
+          <uk-icon icon="arrow-left"></uk-icon>
+          <span class="ml" style={stl({ "--ml": "2" })}>Close</span>
+        </button>
+      </div>
+
+      <ul
+        class="uk-nav uk-nav-default mx mt"
+        style={stl({ "--mx": "-1", "--mt": "4" })}
+      >
+        <li class="uk-nav-header">Genres</li>
+        {
+          Object.values(D.genres).map((a) => (
+            <li class={$d == `/genres/${a.slug}` ? "uk-active" : ""}>
+              <a href={`/genres/${a.slug}`}>{a.text}</a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <ul
+        class="uk-nav uk-nav-default mx mt"
+        style={stl({ "--mx": "-1", "--mt": "4" })}
+      >
+        <li class="uk-nav-header">Themes</li>
+        {
+          Object.values(D.themes).map((a) => (
+            <li class={$d == `/themes/${a.slug}` ? "uk-active" : ""}>
+              <a href={`/themes/${a.slug}`}>{a.text}</a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <ul
+        class="uk-nav uk-nav-default mx mt"
+        style={stl({ "--mx": "-1", "--mt": "4" })}
+      >
+        <li class="uk-nav-header">External Links</li>
+        <li>
+          <a
+            class="justify-between"
+            href="https://antarvasna.asia"
+            target="_blank"
+          >
+            Hindi Sex Stories
+            <uk-icon icon="external-link"></uk-icon>
+          </a>
+        </li>
+        <li>
+          <a
+            class="justify-between"
+            href="https://pinoysexstories.com"
+            target="_blank"
+          >
+            Filipino Sex Stories
+            <uk-icon icon="external-link"></uk-icon>
+          </a>
+        </li>
+        <li>
+          <a
+            class="justify-between"
+            href="https://ceritasex.asia"
+            target="_blank"
+          >
+            Cerita Sex
+            <uk-icon icon="external-link"></uk-icon>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</Master>

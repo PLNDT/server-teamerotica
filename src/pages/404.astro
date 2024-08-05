@@ -1,0 +1,32 @@
+---
+import Master from "layouts/master.astro";
+---
+
+<Master $document={{ title: "Page Not Found" }}>
+  <div
+    class="px py lg:px lg:py mx-auto max-w-screen-xl"
+    style="--px: 4; --py: 8; --lg-px: 6; --lg-py: 16"
+  >
+    <div
+      class="space-y mx-auto max-w-screen-sm text-center"
+      style="--space-y: 4"
+    >
+      <h1
+        class="text-primary text-7xl font-extrabold tracking-tight lg:text-9xl"
+      >
+        404
+      </h1>
+
+      <p class="text-primary text-3xl font-bold tracking-tight md:text-4xl">
+        Page Not Found
+      </p>
+
+      <p class="text-muted-foreground text-lg font-light">
+        Sorry, we can't find that page. You'll find lots to explore on the
+        homepage.
+      </p>
+
+      <a class="uk-button uk-button-primary" href="/">Back to Homepage</a>
+    </div>
+  </div>
+</Master>

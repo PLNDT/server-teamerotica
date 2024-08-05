@@ -1,0 +1,32 @@
+---
+import { stl } from "helpers/common";
+import Main from "layouts/main.astro";
+---
+
+<Main
+  $document={{
+    title: "Search",
+  }}
+>
+  <div class="tx-posts">
+    <div
+      class="sm:px sm:pt pb"
+      style={stl({
+        "--pb": "6",
+        "--sm-px": "10",
+        "--sm-pt": "20",
+      })}
+    >
+      <h1 class="uk-h1">Search</h1>
+      <p
+        class="color mt"
+        style={stl({
+          "--color": "var(--uk-muted-f)",
+          "--mt": "2",
+        })}
+      >
+        The search feature is currently unavailable. Please check back soon.
+      </p>
+    </div>
+  </div>
+</Main>

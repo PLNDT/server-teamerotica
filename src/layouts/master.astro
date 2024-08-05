@@ -1,0 +1,177 @@
+---
+import { stl } from "helpers/common";
+
+const { $document } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{$document.title}</title>
+
+    <!-- FF (A) -->
+    <link
+      rel="preload"
+      href="/fonts/geist-font/fonts/GeistVariableVF.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/geist-font/fonts/GeistMonoVariableVF.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/fonts/geist-font/style.css" />
+
+    <!-- FF (B) -->
+    <link
+      rel="preload"
+      href="/fonts/cal-sans-ui/fonts/variable/CalSansUI[MODE,wght].ttf"
+      as="font"
+      type="font/ttf"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/paper-mono/fonts/webfonts/PaperMono-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/fonts/cal-sans-ui/style.css" />
+    <link rel="stylesheet" href="/fonts/paper-mono/style.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/frankenstyle@0.3.2/dist/css/frankenstyle-kit.min.css"
+    />
+    <link rel="stylesheet" href="/css/tx.css" />
+
+    <script is:inline>
+      const htmlElement = document.documentElement;
+
+      const __FRANKEN__ = JSON.parse(
+        localStorage.getItem("__FRANKEN__") || "{}",
+      );
+
+      if (
+        __FRANKEN__.mode === "dark" ||
+        (!__FRANKEN__.mode &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        htmlElement.classList.add("dark");
+      } else {
+        htmlElement.classList.remove("dark");
+      }
+
+      htmlElement.classList.add(__FRANKEN__.layout || "uk-layout-small");
+      htmlElement.classList.add(__FRANKEN__.ff || "uk-ff-a");
+    </script>
+
+    {
+      $document.meta &&
+        Object.keys($document.meta).map((key) => (
+          <meta name={key} content={$document.meta[key]} />
+        ))
+    }
+
+    {
+      $document.og &&
+        Object.entries($document.og).map(([key, value]) => (
+          <meta property={`og:${key}`} content={value as string} />
+        ))
+    }
+
+    {
+      $document.jsonLd && (
+        <script
+          is:inline
+          type="application/ld+json"
+          set:html={JSON.stringify($document.jsonLd)}
+        />
+      )
+    }
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <!-- Google tag (gtag.js) -->
+    <script
+      is:inline
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-ZVBCDRX8E5"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-ZVBCDRX8E5");
+    </script>
+
+    <!-- Load the core file in the <head> -->
+    <script
+      is:inline
+      src="https://cdn.jsdelivr.net/npm/frankenstyle@0.3.2/dist/js/hwc-core.iife.js"
+      type="module"></script>
+  </head>
+  <body
+    class="bg color font-family"
+    style={stl({
+      "--bg": "var(--uk-bg)",
+      "--color": "var(--uk-bg-f)",
+      "--font-family": "var(--uk-global-font-family-sans)",
+    })}
+  >
+    <slot />
+
+    <!-- Optional: Suppress errors if you don't plan to use Lucide or ApexCharts -->
+    <script is:inline>
+      // window.Lucide = {};
+      window.ApexCharts = {};
+    </script>
+
+    <!-- Optional: Runtime -->
+    <script
+      is:inline
+      src="https://cdn.jsdelivr.net/npm/frankenstyle@0.3.2/dist/js/frankenstyle.iife.js"
+      type="module"></script>
+
+    <!-- Optional: Icons -->
+    <script
+      is:inline
+      src="https://cdn.jsdelivr.net/npm/frankenstyle@0.3.2/dist/js/hwc-icon.iife.js"
+      type="module"></script>
+
+    <!-- Optional: Charts -->
+    <!-- <script
+      is:inline
+      src="https://cdn.jsdelivr.net/npm/frankenstyle@0.3.2/dist/js/hwc-chart.iife.js"
+      type="module"></script> -->
+
+    <!-- Load components last -->
+    <script
+      is:inline
+      src="https://cdn.jsdelivr.net/npm/frankenstyle@0.3.2/dist/js/hwc-components.iife.js"
+      type="module"></script>
+
+    <!-- Optional: Frankternity core file -->
+    <!-- <script
+      is:inline
+      src="https://cdn.jsdelivr.net/npm/frankenstyle@0.3.2/dist/js/ft-core.iife.js"
+    ></script> -->
+
+    <!-- You can load Frankternity components below -->
+
+    <script is:inline src="/js/alpinejs@3.14.9/alpinejs.min.js"></script>
+  </body>
+</html>
