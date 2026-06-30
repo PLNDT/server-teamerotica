@@ -187,6 +187,24 @@ const { $document, $d } = Astro.props;
       </div>
     </div>
 
+    <div
+      class="display-flex [h] my items-center justify-center"
+      style="--h: 112px; --my: 5"
+    >
+      <!-- JuicyAds v3.0 -->
+      <script
+        is:inline
+        type="text/javascript"
+        data-cfasync="false"
+        async
+        src="https://poweredby.jads.co/js/jads.js"></script>
+      <ins id="1121018" data-width="300" data-height="112"></ins>
+      <script is:inline type="text/javascript" data-cfasync="false" async>
+        (adsbyjuicy = window.adsbyjuicy || []).push({ adzone: 1121018 });
+      </script>
+      <!--JuicyAds END-->
+    </div>
+
     <slot />
   </main>
 
@@ -286,4 +304,12 @@ const { $document, $d } = Astro.props;
       </ul>
     </div>
   </div>
+
+  <!-- JuicyAds PopUnders v3 Start -->
+  <script
+    is:inline
+    type="text/javascript"
+    src="https://js.juicyads.com/jp.php?c=34c4w2x2r264u4r2p2b4036454&u=https%3A%2F%2Fwww.juicyads.rocks"
+  ></script>
+  <!-- JuicyAds PopUnders v3 End -->
 </Master>
