@@ -103,20 +103,11 @@ const { $document } = Astro.props;
 
     <link rel="sitemap" href="/sitemap-index.xml" />
 
-    <!-- Google tag (gtag.js) -->
     <script
       is:inline
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-ZVBCDRX8E5"></script>
-    <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-
-      gtag("config", "G-ZVBCDRX8E5");
-    </script>
+      defer
+      src="https://u.trackmaster.ovh/script.js"
+      data-website-id="5400bbd4-c963-4991-9c9a-a9bee7e8b8e0"></script>
 
     <!-- Load the core file in the <head> -->
     <script
