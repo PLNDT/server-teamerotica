@@ -8,7 +8,13 @@ import Main from "layouts/main.astro";
     title: "Search",
   }}
 >
-  <div class="tx-posts">
+  <style>
+    [x-cloak] {
+      display: none !important;
+    }
+  </style>
+
+  <div class="tx-posts" x-data="searchApp">
     <div
       class="sm:px sm:pt pb"
       style={stl({
@@ -18,15 +24,163 @@ import Main from "layouts/main.astro";
       })}
     >
       <h1 class="uk-h1">Search</h1>
+
       <p
-        class="color mt"
+        class="color mt pb"
         style={stl({
           "--color": "var(--uk-muted-f)",
           "--mt": "2",
+          "--pb": "6",
         })}
       >
-        The search feature is currently unavailable. Please check back soon.
+        Find your next favorite story. Type at least 2 characters to begin.
       </p>
+
+      <div class="uk-inline w-full">
+        <span class="uk-form-icon">
+          <uk-icon
+            x-show="!loading"
+            class="size"
+            style={stl({ "--size": "4" })}
+            icon="search"></uk-icon>
+
+          <uk-icon
+            x-show="loading"
+            x-cloak
+            class="size animate-spin"
+            style={stl({ "--size": "4" })}
+            icon="loader"></uk-icon>
+        </span>
+
+        <input
+          class="uk-input"
+          type="text"
+          placeholder="Search"
+          x-model="query"
+          @input.debounce.500ms="performSearch"
+        />
+      </div>
     </div>
+
+    <template x-if="error">
+      <div
+        class="sm:px pb"
+        style={stl({
+          "--pb": "6",
+          "--sm-px": "10",
+        })}
+      >
+        <div x-show="error" x-cloak class="uk-alert uk-alert-danger">
+          <p x-text="error"></p>
+        </div>
+      </div>
+    </template>
+
+    <template
+      x-if="!loading && results.length === 0 && query.trim().length >= 2 && !error"
+    >
+      <div
+        class="sm:px pb"
+        style={stl({
+          "--pb": "6",
+          "--sm-px": "10",
+        })}
+      >
+        <div class="uk-alert uk-alert-warning">
+          <p>No stories found for "<span x-text="query"></span>".</p>
+        </div>
+      </div>
+    </template>
+
+    <template x-if="results.length > 0">
+      <div class="tx-posts-grid">
+        <template x-for="result in results" :key="result.slug">
+          <article class="tx-posts-grid-item group">
+            <h2
+              class="uk-h3 color"
+              style={stl({
+                "--color": "var(--uk-bg-f)",
+              })}
+            >
+              <a class="uk-focus-visible" :href="result.link">
+                <span x-text="result.title"></span>
+                <span class="inset absolute" style="--inset: 0"></span>
+              </a>
+            </h2>
+            <p
+              class="color:group-hover transition-colors:group-hover line-clamp-3"
+              style={stl({
+                "--color-group-hover": "var(--uk-bg-f)",
+              })}
+              x-text="result.excerpt"
+            >
+            </p>
+            <div
+              class="display-flex gap-x items-center"
+              style={stl({
+                "--gap-x": "2",
+              })}
+            >
+              <div class="uk-avatar uk-avatar-rounded uk-avatar-bordered">
+                <img
+                  :src="`https://api.dicebear.com/9.x/lorelei/svg?seed=${result.author}`"
+                  alt=""
+                />
+              </div>
+              <span
+                class="color:group-hover transition-colors:group-hover"
+                style={stl({
+                  "--color-group-hover": "var(--uk-bg-f)",
+                })}
+                data-fs=""
+                x-text="result.author"></span>
+            </div>
+          </article>
+        </template>
+      </div>
+    </template>
   </div>
+
+  <script is:inline>
+    document.addEventListener("alpine:init", () => {
+      Alpine.data("searchApp", () => ({
+        query: "",
+        results: [],
+        loading: false,
+        error: null,
+
+        async performSearch() {
+          this.error = null;
+
+          if (this.query.trim().length < 2) {
+            this.results = [];
+            return;
+          }
+
+          this.loading = true;
+
+          try {
+            const params = new URLSearchParams({ q: this.query });
+
+            const response = await fetch(
+              `https://s.trackmaster.ovh/search?${params.toString()}`,
+            );
+
+            if (!response.ok) {
+              const errData = await response.json().catch(() => ({}));
+              throw new Error(errData.error || "Search failed");
+            }
+
+            const data = await response.json();
+            this.results = data.results || [];
+          } catch (err) {
+            this.error = err.message;
+            this.results = [];
+          } finally {
+            this.loading = false;
+          }
+        },
+      }));
+    });
+  </script>
 </Main>
